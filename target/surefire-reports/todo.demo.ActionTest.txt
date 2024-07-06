@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: todo.demo.ActionTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.913 s -- in todo.demo.ActionTest
