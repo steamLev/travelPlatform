@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создайте заказ</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="container">
+    <form class="order-form" method="post" th:action="@{/order/create}">
+        <h1>Создайте заказ</h1>
+        <p>Заполните небольшую анкету, и забронируйте поездку</p>
+        <div class="input-group">
+            <label for="phone">Телефон</label>
+            <input type="text" id="phone" placeholder="+996 (999) 999-999">
+        </div>
+        <div class="input-group">
+            <label for="name">Имя</label>
+            <input type="text" id="name" placeholder="Имя">
+        </div>
+        <div class="input-group">
+            <label for="to">Куда едем?</label>
+            <input type="text" id="to" placeholder="Куда едем?">
+        </div>
+        <div class="input-group">
+            <label for="from">Откуда едем?</label>
+            <input type="text" id="from" placeholder="Откуда едем?">
+        </div>
+        <button type="submit">Отправить</button>
+        <p class="terms">Нажимая отправить, вы соглашаетесь с условиями и правилами сайта</p>
+    </form>
+</div>
+</body>
+</html>

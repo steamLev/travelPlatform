@@ -1,0 +1,15 @@
+runtime: java21
+instance_class: F1
+env: standard
+
+handlers:
+  - url: /.*
+    script: this field is required, but ignored
+    secure: always
+
+env_variables:
+  SPRING_DATASOURCE_URL: jdbc:h2:file:/tmp/data/h2db
+  SPRING_DATASOURCE_USERNAME: sa
+  SPRING_DATASOURCE_PASSWORD: password
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+  SPRING_H2_CONSOLE_ENABLED: true

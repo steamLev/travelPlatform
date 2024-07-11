@@ -3,38 +3,73 @@ package todo.demo.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import todo.demo.Models.OrderTask;
 import todo.demo.Services.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 @Slf4j
-@RestController
+@Controller
 public class OrderControllers {
 
 ExecutorService service=   Executors.newFixedThreadPool(3);
 @Autowired
 TravelService travelService;
 
+    @Value("${processType.create}")
+    String create;
+    @Value("${processType.process}")
+    String processed;
+    @Value("${processType.done}")
+    String done;
+    @GetMapping("/order")
+    public String indexOrder(){
+
+        return "index";
+    }
 @PostMapping(value = "order/create/{from}/{to}/{data}/{transport}/{clientId}")
 public void createTask(@PathVariable("from") String from,
                        @PathVariable("to") String to,
                        @PathVariable("data") String data,
                        @PathVariable("transport") Integer transport,
-                       @PathVariable("clientId") Integer clientId){
+                       @PathVariable("clientId") Integer clientId,
+                       @PathVariable("amount") Integer amount){
 Boolean result;
 //создаем задание
     try{
-        Callable<Boolean> callableTask = () -> {return  travelService.createOrder(new OrderTask(from,to, data,transport,clientId));};
+        Callable<Boolean> callableTask = () -> {
+            return  travelService.createOrder(new OrderTask(from,to, data,transport,clientId,new BigDecimal(amount)));};
         result=service.submit(callableTask).get(3000, TimeUnit.SECONDS);
 
     }
     catch (Exception e){log.info("deleteTask error");e.printStackTrace();}
 
 }
+
+    @PostMapping(value = "order/create")
+    public String createTaskIndex(@ModelAttribute OrderTask orderForm/*@RequestParam (value = "from",required = false) String from,
+                                @RequestParam (value = "to",required = false) String to,
+                                @RequestParam (value = "phone",required = false) String phone,
+                                  @RequestParam (value = "name",required = false) String name */){
+        Boolean result;
+//создаем задание
+        log.info("from"+orderForm.getFkFrom());
+        log.info("to"+orderForm.getFkTo());
+        try{
+            Callable<Boolean> callableTask = () -> {
+                return  travelService.createOrder(orderForm);};
+            result=service.submit(callableTask).get(3000, TimeUnit.SECONDS);
+
+        }
+        catch (Exception e){log.info("deleteTask error");e.printStackTrace();}
+        return "index";
+    }
 
 @GetMapping(value = "order/get/all")
 public List<?> getTask(){
@@ -77,13 +112,15 @@ public void deleteTask(@PathVariable("id") Long id){
     catch (Exception e){log.info("deleteTask error");e.printStackTrace();}
 }
 
-@PutMapping(value = "order/put/{id}/{from}/{to}/{date}/{transport}")
+@PutMapping(value = "order/put/{id}/{from}/{to}/{date}/{transport}/{process}")
 public void putTask(@PathVariable("id") Long id,
                     @PathVariable("from") String from,
                     @PathVariable("to") String to,
                     @PathVariable("date") String date,
-                    @PathVariable("transport") Integer transport){
-    OrderTask orderTask=new OrderTask(id,from,to,date,transport);
+                    @PathVariable("transport") Integer transport,
+                    @PathVariable("process") Integer process){
+    OrderTask orderTask=new OrderTask(id,from,to,date,transport,process==1?
+            create:process==2?processed:process==3?done:"empty");
     Boolean result;
     //вносим изменения в     задание по id
     try{
