@@ -33,6 +33,11 @@ TravelService travelService;
 
         return "index";
     }
+    @GetMapping("/order/destination")
+    public String destinationOrder(){
+
+        return "destination";
+    }
 @PostMapping(value = "order/create/{from}/{to}/{data}/{transport}/{clientId}")
 public void createTask(@PathVariable("from") String from,
                        @PathVariable("to") String to,
@@ -53,17 +58,17 @@ Boolean result;
 }
 
     @PostMapping(value = "order/create")
-    public String createTaskIndex(@ModelAttribute OrderTask orderForm/*@RequestParam (value = "from",required = false) String from,
+    public String createTaskIndex( @RequestParam (value = "from",required = false) String from,
                                 @RequestParam (value = "to",required = false) String to,
                                 @RequestParam (value = "phone",required = false) String phone,
-                                  @RequestParam (value = "name",required = false) String name */){
+                                  @RequestParam (value = "name",required = false) String name ){
         Boolean result;
 //создаем задание
-        log.info("from"+orderForm.getFkFrom());
-        log.info("to"+orderForm.getFkTo());
+        log.info("from"+from);
+        log.info("to"+to);
         try{
             Callable<Boolean> callableTask = () -> {
-                return  travelService.createOrder(orderForm);};
+                return  travelService.createOrder(new OrderTask(from,to,phone,name));};
             result=service.submit(callableTask).get(3000, TimeUnit.SECONDS);
 
         }
@@ -72,6 +77,7 @@ Boolean result;
     }
 
 @GetMapping(value = "order/get/all")
+@ResponseBody
 public List<?> getTask(){
     List<OrderTask> list=new ArrayList<>();
     //выгружаем все  задания в многопоточном режиме
