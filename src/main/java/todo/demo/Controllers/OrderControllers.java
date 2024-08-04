@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import todo.demo.Models.OrderTask;
 import todo.demo.Services.*;
@@ -36,7 +37,7 @@ TravelService travelService;
     @GetMapping("/order/destination")
     public String destinationOrder(){
 
-        return "destination";
+        return "clients/destination";
     }
 @PostMapping(value = "order/create/{from}/{to}/{data}/{transport}/{clientId}")
 public void createTask(@PathVariable("from") String from,
@@ -57,38 +58,57 @@ Boolean result;
 
 }
 
-    @PostMapping(value = "order/create")
-    public String createTaskIndex( @RequestParam (value = "from",required = false) String from,
-                                @RequestParam (value = "to",required = false) String to,
-                                @RequestParam (value = "phone",required = false) String phone,
-                                  @RequestParam (value = "name",required = false) String name ){
-        Boolean result;
-//создаем задание
-        log.info("from"+from);
-        log.info("to"+to);
-        try{
-            Callable<Boolean> callableTask = () -> {
-                return  travelService.createOrder(new OrderTask(from,to,phone,name));};
-            result=service.submit(callableTask).get(3000, TimeUnit.SECONDS);
+    @PostMapping(value = "/order/create")
+    public String createTaskIndex(
+            @RequestParam(value = "from", required = false) String from,
+            @RequestParam(value = "to", required = false) String to,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "name", required = false) String name) {
 
+        Boolean result = false;
+        log.info("from: " + from);
+        log.info("to: " + to);
+        log.info("phone: " + phone);
+        log.info("name: " + name);
+
+        try {
+            Callable<Boolean> callableTask = () -> travelService.createOrder(new OrderTask(from, to, phone, name));
+            result = service.submit(callableTask).get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("Error creating task", e);
         }
-        catch (Exception e){log.info("deleteTask error");e.printStackTrace();}
-        return "index";
+
+        if (result) {
+            return "redirect:/order/success";  // Перенаправление на страницу успеха
+        } else {
+            return "redirect:/order/failure";  // Перенаправление на страницу ошибки
+        }
+    }
+    @GetMapping("/order/success")
+    public String orderSuccess() {
+        return "clients/success";
     }
 
-@GetMapping(value = "order/get/all")
-@ResponseBody
-public List<?> getTask(){
+    @GetMapping("/order/failure")
+    public String orderFailure() {
+        return "clients/failure";
+    }
+
+
+    @GetMapping(value = "order/get/all")
+public String getTask(Model model){
     List<OrderTask> list=new ArrayList<>();
     //выгружаем все  задания в многопоточном режиме
     try{
         Callable<List<OrderTask>> callableTask = () -> (List<OrderTask>) travelService.getOrderTask( new OrderTask());
            list=service.submit(callableTask).get(3000, TimeUnit.SECONDS);
+
+        model.addAttribute("orders", list);
     }
     catch (Exception e){log.info("getTask error");
          e.printStackTrace();}
 
-    return list;
+    return "subs/index";
 }
 
     @GetMapping(value = "order/get/{id}")

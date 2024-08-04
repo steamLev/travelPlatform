@@ -8,6 +8,10 @@ import todo.demo.Repositories.OrderRepository;
 import todo.demo.Services.Action;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Component(value = "create")
 public class ActionCreateOrder implements Action {
@@ -22,6 +26,7 @@ public class ActionCreateOrder implements Action {
         order=(OrderTask)object;
         order.setStatus(false);
         order.setProcess(create);
+        order.setScheduledDate(  LocalDate.now().toString());
         orderRepository.save(order);
         return  true;
     }
